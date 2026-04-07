@@ -25,6 +25,7 @@
   --card-sh:0 2px 12px rgba(0,0,0,.5);
   --step-clr:#7df725;--step-dim:rgba(125,247,37,.15);--step-active-text:#1a1a1a;
   --p:#00de5a;--p-hi:#33ff88;--p-dim:rgba(0,222,90,.12);
+  --brand-clr:#7df725;
 }
 [data-theme="light"]{
   --bg:#f5f1ea;--s1:#ffffff;--s2:#faf7f2;--s3:#eee9e0;
@@ -33,13 +34,14 @@
   --card-sh:0 2px 12px rgba(0,0,0,.06);
   --step-clr:#196116;--step-dim:rgba(25,97,22,.1);--step-active-text:#ffffff;
   --p:#1a6b4a;--p-hi:#22875e;--p-dim:rgba(26,107,74,.08);
+  --brand-clr:#1a6b4a;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;transition:var(--tt);}
 
 /* ── NAV BAR ── */
 .navbar{position:sticky;top:0;z-index:100;background:var(--s1);border-bottom:2px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;transition:var(--tt);}
-.nav-brand{font-family:var(--font-d);font-weight:900;font-size:1.1rem;color:var(--accent);letter-spacing:-0.5px;}
+.nav-brand{font-family:var(--font-d);font-weight:900;font-size:1.3rem;color:var(--brand-clr);letter-spacing:-0.5px;}
 .nav-links{display:flex;gap:4px;}
 .nav-link{padding:6px 14px;border-radius:var(--r-xs);font-size:.82rem;font-weight:700;cursor:pointer;color:var(--mid);transition:all .15s;position:relative;font-family:var(--font-b);}
 .nav-link:hover{color:var(--text);}
@@ -52,7 +54,7 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height
 /* ── CONTAINER ── */
 .main-wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px;}
 .page-hero{text-align:center;padding:32px 0 20px;}
-.page-hero-title{font-family:var(--font-d);font-size:2rem;font-weight:900;letter-spacing:-1px;margin-bottom:6px;}
+.page-hero-title{font-family:var(--font-d);font-size:2.4rem;font-weight:900;letter-spacing:-1px;margin-bottom:6px;}
 .page-hero-sub{font-size:.85rem;color:var(--mid);line-height:1.6;white-space:pre-wrap;}
 
 /* ── GROUP ACCORDION ── */
@@ -232,15 +234,11 @@ input[type=number]{-moz-appearance:textfield;}
         </div>
       </div>
       <div class="form-section">
-        <div class="form-section-title">📝 買家與付款資訊</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="form-group"><label class="form-label">社群帳號 Full Name</label><input type="text" class="buyer-input" id="socialName" placeholder="請輸入社群帳號"></div>
-          <div class="form-group"><label class="form-label">連絡電話 Contact Phone</label><input type="tel" class="buyer-input" id="phone" placeholder="09XX-XXX-XXX"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="form-group"><label class="form-label">社群 ID (IG/FB)</label><input type="url" class="buyer-input" id="socialLink" placeholder="@your_id"></div>
-          <div class="form-group"><label class="form-label">備註 Note（選填）</label><textarea class="buyer-textarea" id="remark" placeholder="想告訴賣家的話" style="min-height:42px;"></textarea></div>
-        </div>
+        <div class="form-section-title">📝 訂購者個人資訊</div>
+        <div class="form-group"><label class="form-label">IG / Line / FB 帳號或 ID</label><input type="text" class="buyer-input" id="socialName" placeholder="請輸入您的社群帳號或 ID"></div>
+        <div class="form-group"><label class="form-label">個人主頁連結</label><input type="url" class="buyer-input" id="socialLink" placeholder="https://..."></div>
+        <div class="form-group"><label class="form-label">連絡電話</label><input type="tel" class="buyer-input" id="phone" placeholder="0912345678"></div>
+        <div class="form-group"><label class="form-label">備註（選填）</label><textarea class="buyer-textarea" id="remark" placeholder="想告訴賣家的話"></textarea></div>
       </div>
       <div class="form-section">
         <div class="form-section-title">💳 付款證明 Payment Proof</div>
@@ -279,7 +277,7 @@ function toggleTheme(){const h=document.documentElement;const d=h.getAttribute('
 (function(){const s=localStorage.getItem('twt-buyer-theme');if(s){document.documentElement.setAttribute('data-theme',s);document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('theme-btn');if(b)b.textContent=s==='dark'?'🌙':'☀️';});}})();
 </script>
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbzpJML0Ihjc_hEzu-EIEXzt-c5eGVwyCInHtSSXbQGuUKbMCpLbTP6J05WqfUuGJ54/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyt3fyRjxbKnqj_-Kv-cID41KV06-PlpJHs1td6PfpfL5wHReyXnpcyNfEISU9rRxHT_g/exec";
 const defaultColumns={open:"🟢 開團中",closed:"🔴 停止收單",arrived:"📦 理貨中",instock:"🛍️ 現貨/已有賣場"};
 const CURRENCY_SYMBOLS={JPY:"¥",KRW:"₩",CNY:"¥",USD:"$",TWD:"NT$"};
 let boardColumns=defaultColumns,appData={},currentCampId=null,currentCampTitle="",currentCurrency="",currentThreshold=0,isSubmitting=false,lastThresholdState=null;
@@ -288,7 +286,23 @@ function esc(s){if(s==null)return'';const d=document.createElement('div');d.text
 /** 自動將文字中的連結轉為可點擊的 <a> */
 function linkify(text){return esc(text).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:var(--p-hi);text-decoration:underline;">$1</a>');}
 async function apiGet(p){const u=p?API_URL+'?'+p:API_URL;const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
-async function apiPost(payload){try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('HTTP '+r.status);try{return await r.json();}catch{return{success:true};}}catch(e){if(e.message.includes('Failed to fetch')||e.message.includes('CORS')){await fetch(API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});return{success:true,fallback:true};}throw e;}}
+async function apiPost(payload){
+  try{
+    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    try{return await r.json();}catch{return{success:true};}
+  }catch(e){
+    // file:// fallback: 用 sendBeacon（不受 CORS 限制）
+    if(navigator.sendBeacon){
+      const blob=new Blob([JSON.stringify(payload)],{type:'text/plain;charset=utf-8'});
+      const sent=navigator.sendBeacon(API_URL,blob);
+      return{success:sent,fallback:true};
+    }
+    // 最後 fallback: no-cors fetch
+    await fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    return{success:true,fallback:true};
+  }
+}
 
 function switchMainTab(tab){document.querySelectorAll('.nav-link').forEach((t,i)=>t.classList.toggle('active',['instock','order','query'][i]===tab));const titles={order:'🛒 下單區',instock:'🛍️ 現有賣場',query:'🔍 訂單查詢'};document.getElementById('page-hero-title').textContent=titles[tab]||'';document.getElementById('tab-order').style.display=tab==='order'?'block':'none';document.getElementById('tab-instock').style.display=tab==='instock'?'block':'none';document.getElementById('tab-query').style.display=tab==='query'?'block':'none';if(tab==='instock')renderInstockList();if(tab==='query'){populateQueryCampSelect();document.getElementById('query-result').classList.remove('show');}}
 
