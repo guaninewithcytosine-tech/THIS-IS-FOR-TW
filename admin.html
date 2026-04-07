@@ -369,7 +369,7 @@ input[type=number]{-moz-appearance:textfield;}
       <div id="priority-wrap"></div>
     </div>
     <div id="cat-list-container"></div>
-    <div style="display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);"><input type="text" class="fi" id="newCatName" placeholder="新區塊名稱（例：扇套）" style="flex:1;"><button class="btn btn-g" onclick="addCategory()">＋ 新增區塊</button></div>
+    <div style="display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);"><input type="text" class="fi" id="newCatName" placeholder="新區塊名稱（例：扇套）" style="flex:1;" onkeydown="if(event.key==='Enter')addCategory()"><button class="btn btn-g" onclick="addCategory()">＋ 新增區塊</button></div>
   </div>
   <button class="btn-save-main" onclick="saveAdminData()">💾 Save to Cloud</button>
 </div>
@@ -447,7 +447,7 @@ function toggleTheme(){
 (function(){const saved=localStorage.getItem('twt-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);document.addEventListener('DOMContentLoaded',()=>{document.getElementById('theme-btn').textContent=saved==='dark'?'🌙':'☀️';});}})();
 </script>
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbzpJML0Ihjc_hEzu-EIEXzt-c5eGVwyCInHtSSXbQGuUKbMCpLbTP6J05WqfUuGJ54/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyt3fyRjxbKnqj_-Kv-cID41KV06-PlpJHs1td6PfpfL5wHReyXnpcyNfEISU9rRxHT_g/exec";
 const defaultColumns={open:"🟢 開團中",closed:"🔴 停止收單",arrived:"📦 理貨中",instock:"🛍️ 現貨/已有賣場"};
 let boardColumns=JSON.parse(localStorage.getItem('myBoardColumns'))||defaultColumns;
 let appData=JSON.parse(localStorage.getItem('myStoreDataV3'))||{};
@@ -467,7 +467,10 @@ async function apiGet(params=''){
 }
 async function apiPost(payload){
   try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('HTTP '+r.status);try{return await r.json();}catch{return{success:true};}}
-  catch(e){if(e.message.includes('Failed to fetch')||e.message.includes('NetworkError')||e.message.includes('CORS')){await fetch(API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});return{success:true,fallback:true};}throw e;}
+  catch(e){
+    if(navigator.sendBeacon){const blob=new Blob([JSON.stringify(payload)],{type:'text/plain;charset=utf-8'});navigator.sendBeacon(API_URL,blob);return{success:true,fallback:true};}
+    await fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});return{success:true,fallback:true};
+  }
 }
 
 // ── 登入（後端驗證優先，本機 file:// 時 fallback 本地密碼）──
@@ -701,15 +704,19 @@ function removeItemImage(cat,idx){delete appData[currentCampId].categories[cat][
 
 function renderCategories(){
   if(!currentCampId)return;const container=document.getElementById('cat-list-container');container.innerHTML='';const cats=appData[currentCampId].categories;
+  if(!appData[currentCampId]._catDefaults)appData[currentCampId]._catDefaults={};
   for(const[catName,items]of Object.entries(cats)){let ih='';
+    const defs=appData[currentCampId]._catDefaults[catName]||{};
     items.forEach((item,idx)=>{const isE=editingItem&&editingItem.cat===catName&&editingItem.idx===idx;
       const imgThumb=item.image?`<img src="${item.image}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);margin-right:8px;">`:'';
-      // 圖片管理按鈕（獨立於編輯模式）
+      // 圖片按鈕：永遠顯示，不在編輯模式內
       const imgBtns=`<div style="display:flex;gap:4px;align-items:center;">
         <label style="cursor:pointer;padding:2px 8px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-xs);font-size:.68rem;color:var(--mid);" title="上傳圖片">📷<input type="file" accept="image/*" style="display:none;" onchange="handleItemImage('${esc(catName)}',${idx},this)"></label>
         ${item.image?`<button class="btn btn-r btn-xs" onclick="removeItemImage('${esc(catName)}',${idx})" style="padding:2px 6px;font-size:.6rem;" title="移除圖片">✕</button>`:''}
       </div>`;
-      if(isE){ih+=`<div class="list-item" style="border:1px solid var(--accent);background:var(--s2);padding:10px 14px;cursor:default;" draggable="false"><div style="display:flex;gap:8px;width:100%;align-items:center;flex-wrap:wrap;">
+      if(isE){
+        // 編輯模式：只有名稱和價格，沒有圖片按鈕
+        ih+=`<div class="list-item" style="border:1px solid var(--accent);background:var(--s2);padding:10px 14px;cursor:default;" draggable="false"><div style="display:flex;gap:8px;width:100%;align-items:center;flex-wrap:wrap;">
         <input type="text" class="fi" id="en_item" value="${esc(item.name)}" placeholder="商品名稱" style="flex:1;min-width:100px;padding:6px 10px;" onkeydown="if(event.key==='Enter')saveEditItem('${esc(catName)}',${idx})">
         <div style="display:flex;align-items:center;gap:4px;"><span style="font-size:0.8rem;color:var(--mid);">NT$</span><input type="number" class="fi inp-price" id="ep_item" value="${item.price}" placeholder="台幣" style="width:70px;padding:6px 10px;"></div>
         <div style="display:flex;align-items:center;gap:4px;"><span style="font-size:0.8rem;color:var(--mid);">原幣</span><input type="number" class="fi inp-price" id="eop_item" value="${item.origPrice||''}" placeholder="選填" style="width:70px;padding:6px 10px;"></div>
@@ -718,7 +725,7 @@ function renderCategories(){
       else{const origStr=item.origPrice?`<span style="font-size:0.75rem;color:var(--dim);margin-left:4px;">(原幣: ${item.origPrice})</span>`:'';
         ih+=`<div class="list-item" draggable="true" ondragstart="handleItemDragStart(event,'${esc(catName)}',${idx})" ondragover="handleDragOver(event)" ondragenter="handleItemDragEnter(event)" ondragleave="handleItemDragLeave(event)" ondrop="handleItemDrop(event,'${esc(catName)}',${idx})" ondragend="handleDragEnd(event)">
         <div style="display:flex;align-items:center;gap:10px;">${imgThumb}<span class="drag-h">☰</span><div><strong>${esc(item.name)}</strong><span class="item-price">NT$ ${item.price} ${origStr}</span></div></div>
-        <div style="display:flex;gap:4px;align-items:center;">${imgBtns}<button class="btn btn-b btn-xs" onclick="editItemInline('${esc(catName)}',${idx})">編輯</button><button class="btn btn-r btn-xs" onclick="delItem('${esc(catName)}',${idx})">✕</button></div></div>`;}});
+        <div style="display:flex;gap:4px;align-items:center;">${imgBtns}<button class="btn btn-b btn-xs" onclick="editItemInline('${esc(catName)}',${idx})">✎</button><button class="btn btn-r btn-xs" onclick="delItem('${esc(catName)}',${idx})">✕</button></div></div>`;}});
     const isEditingCat = editingCatName===catName;
     const catImg = appData[currentCampId]._catImages?.[catName];
     const catImgHtml = catImg ? `<img src="${catImg}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">` : '';
@@ -727,41 +734,45 @@ function renderCategories(){
       catHeader=`<div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;">
         <span class="drag-h">☰</span>
         <input type="text" class="fi" id="edit-cat-name-input" value="${esc(catName)}" style="flex:1;min-width:120px;padding:6px 10px;" onkeydown="if(event.key==='Enter')saveEditCatName('${esc(catName)}')">
-        <label style="cursor:pointer;padding:4px 10px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-xs);font-size:.72rem;color:var(--mid);">📷<input type="file" accept="image/*" style="display:none;" onchange="handleCatImage('${esc(catName)}',this)"></label>
-        ${catImg?`<button class="btn btn-ghost btn-xs" onclick="removeCatImage('${esc(catName)}')">移除圖</button>`:''}
         <button class="btn btn-g btn-sm" onclick="saveEditCatName('${esc(catName)}')">儲存</button>
         <button class="btn btn-ghost btn-sm" onclick="cancelEditCatName()">取消</button>
       </div>`;
     } else {
       catHeader=`<div style="display:flex;align-items:center;gap:8px;"><span class="drag-h">☰</span>${catImgHtml}<strong style="font-size:.95rem;">📁 ${esc(catName)}</strong></div>
-      <div style="display:flex;gap:6px;">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <label style="cursor:pointer;padding:2px 8px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-xs);font-size:.68rem;color:var(--mid);" title="區塊圖片">📷<input type="file" accept="image/*" style="display:none;" onchange="handleCatImage('${esc(catName)}',this)"></label>
+        ${catImg?`<button class="btn btn-ghost btn-xs" onclick="removeCatImage('${esc(catName)}')" style="padding:2px 6px;font-size:.6rem;">✕圖</button>`:''}
         <button class="btn btn-y btn-xs" onclick="dupCategory('${esc(catName)}')">複製</button>
         <button class="btn btn-b btn-xs" onclick="startEditCatName('${esc(catName)}')">編輯</button>
         <button class="btn btn-r btn-xs" onclick="delCategory('${esc(catName)}')">刪除</button>
       </div>`;
     }
-    // 批次設定價格區塊
     const batchRow=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;padding:8px 10px;background:var(--s3);border-radius:var(--r-xs);font-size:.78rem;">
-      <span style="color:var(--mid);white-space:nowrap;">批次設定：</span>
-      <input type="number" class="fi inp-price" id="bp_${catName}" placeholder="NT$" style="width:80px;padding:5px 8px;font-size:.8rem;">
-      <input type="number" class="fi inp-price" id="bop_${catName}" placeholder="原幣" style="width:80px;padding:5px 8px;font-size:.8rem;">
+      <span style="color:var(--mid);white-space:nowrap;">區塊預設價：</span>
+      <input type="number" class="fi inp-price" id="bp_${catName}" placeholder="NT$" value="${defs.price||''}" style="width:80px;padding:5px 8px;font-size:.8rem;" onchange="saveCatDefault('${esc(catName)}')">
+      <input type="number" class="fi inp-price" id="bop_${catName}" placeholder="原幣" value="${defs.origPrice||''}" style="width:80px;padding:5px 8px;font-size:.8rem;" onchange="saveCatDefault('${esc(catName)}')">
       <button class="btn btn-b btn-xs" onclick="batchSetPrice('${esc(catName)}')">套用全部</button>
     </div>`;
     container.innerHTML+=`<div class="admin-sec draggable-category" draggable="true" ondragstart="handleCatDragStart(event,'${esc(catName)}')" ondragover="handleDragOver(event)" ondragenter="handleCatDragEnter(event)" ondragleave="handleCatDragLeave(event)" ondrop="handleCatDrop(event,'${esc(catName)}')" ondragend="handleDragEnd(event)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">${catHeader}</div>
       ${batchRow}
       <div style="margin-bottom:12px;">${ih}</div>
-      <div class="add-row"><input type="text" class="fi" id="nn_${catName}" placeholder="商品名稱" onkeydown="if(event.key==='Enter')addItem('${esc(catName)}')"><input type="number" class="fi inp-price" id="np_${catName}" placeholder="台幣" onkeydown="if(event.key==='Enter')addItem('${esc(catName)}')"><input type="number" class="fi inp-price" id="nop_${catName}" placeholder="原幣(選填)" onkeydown="if(event.key==='Enter')addItem('${esc(catName)}')"><button class="btn btn-g btn-sm" onclick="addItem('${esc(catName)}')">＋</button></div>
+      <div class="add-row"><input type="text" class="fi" id="nn_${catName}" placeholder="商品名稱（Enter 新增）" onkeydown="if(event.key==='Enter')addItem('${esc(catName)}')"><button class="btn btn-g btn-sm" onclick="addItem('${esc(catName)}')">＋</button></div>
     </div>`;
   }
 }
-// 批次設定價格
-function batchSetPrice(cat){
-  const p=parseInt(document.getElementById('bp_'+cat)?.value);
+function saveCatDefault(cat){
+  if(!appData[currentCampId]._catDefaults)appData[currentCampId]._catDefaults={};
+  const p=parseInt(document.getElementById('bp_'+cat)?.value)||0;
   const op=parseInt(document.getElementById('bop_'+cat)?.value)||0;
-  if(isNaN(p)&&!op){notify('請至少輸入一個價格','warn');return;}
+  appData[currentCampId]._catDefaults[cat]={price:p,origPrice:op};
+}
+function batchSetPrice(cat){
+  saveCatDefault(cat);
+  const defs=appData[currentCampId]._catDefaults[cat]||{};
+  if(!defs.price&&!defs.origPrice){notify('請先設定區塊預設價','warn');return;}
   const items=appData[currentCampId].categories[cat];
-  items.forEach(item=>{if(!isNaN(p))item.price=p;if(op)item.origPrice=op;});
+  items.forEach(item=>{if(defs.price)item.price=defs.price;if(defs.origPrice)item.origPrice=defs.origPrice;});
   renderCategories();
   notify(`已套用到「${cat}」的 ${items.length} 個商品 ✓`);
 }
@@ -820,7 +831,10 @@ function removeCatImage(catName){if(appData[currentCampId]._catImages)delete app
 function addCategory(){const n=document.getElementById('newCatName').value.trim();const c=appData[currentCampId].categories;if(!n){notify('請輸入區塊名稱','err');return;}if(c[n]){notify('區塊名稱已存在','err');return;}c[n]=[];document.getElementById('newCatName').value='';renderCategories();}
 function dupCategory(o){const c=appData[currentCampId].categories;const copyName=o+" (複製)";let n=copyName;let i=2;while(c[n]){n=copyName+' '+i;i++;}c[n]=JSON.parse(JSON.stringify(c[o]));if(appData[currentCampId]._catImages&&appData[currentCampId]._catImages[o]){appData[currentCampId]._catImages[n]=appData[currentCampId]._catImages[o];}renderCategories();}
 function delCategory(n){if(confirm(`確定刪除「${n}」？`)){delete appData[currentCampId].categories[n];if(appData[currentCampId]._catImages)delete appData[currentCampId]._catImages[n];renderCategories();}}
-function addItem(cat){const n=document.getElementById(`nn_${cat}`).value.trim();const p=parseInt(document.getElementById(`np_${cat}`).value);const op=parseInt(document.getElementById(`nop_${cat}`).value)||0;if(!n||isNaN(p)){notify('請填寫商品名稱與台幣價格','err');return;}appData[currentCampId].categories[cat].push({id:'p'+Date.now(),name:n,price:p,origPrice:op});document.getElementById(`nn_${cat}`).value='';document.getElementById(`np_${cat}`).value='';document.getElementById(`nop_${cat}`).value='';renderCategories();}
+function addItem(cat){const n=document.getElementById(`nn_${cat}`).value.trim();if(!n){notify('請填寫商品名稱','err');return;}
+  const defs=(appData[currentCampId]._catDefaults||{})[cat]||{};
+  const p=defs.price||0;const op=defs.origPrice||0;
+  appData[currentCampId].categories[cat].push({id:'p'+Date.now(),name:n,price:p,origPrice:op});document.getElementById(`nn_${cat}`).value='';renderCategories();}
 function delItem(cat,idx){appData[currentCampId].categories[cat].splice(idx,1);renderCategories();}
 
 // ── 儲存至雲端 ──
