@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>GAS 診斷 v2</title></head>
+<body style="background:#111;color:#fff;font-family:monospace;padding:20px;">
+<h2>GAS 端點診斷 v2</h2>
+<button onclick="testGet()">1. GET 基本連線</button>
+<button onclick="testVerify()">2. 密碼驗證</button>
+<button onclick="testOrders()">3. 讀取訂單</button>
+<button onclick="testPost()">4. 測試 POST</button>
+<pre id="log" style="background:#222;padding:16px;margin-top:16px;border-radius:8px;white-space:pre-wrap;max-height:600px;overflow:auto;"></pre>
+<script>
+const API="https://script.google.com/macros/s/AKfycbzg3VB4wihG07qx-rfkwwCKBoN9bsKP0pswwTBn_KJNBzLhDWpr0viDV6kJ3xbelJIrhQ/exec";
+const log=document.getElementById('log');
+function addLog(msg){log.textContent+=msg+'\n\n';log.scrollTop=log.scrollHeight;}
+
+async function testGet(){
+  addLog('>>> GET '+API);
+  try{const r=await fetch(API);addLog('Status: '+r.status);const t=await r.text();addLog('Body:\n'+t.substring(0,500));}
+  catch(e){addLog('❌ Error: '+e.message);}
+}
+async function testVerify(){
+  const url=API+'?action=verifyPassword&pwd=880818';
+  addLog('>>> GET '+url);
+  try{const r=await fetch(url);const t=await r.text();addLog('Body: '+t);}
+  catch(e){addLog('❌ Error: '+e.message);}
+}
+async function testOrders(){
+  const url=API+'?action=getAllOrders';
+  addLog('>>> GET '+url);
+  try{const r=await fetch(url);addLog('Status: '+r.status);const t=await r.text();addLog('Body (first 500 chars):\n'+t.substring(0,500));
+    try{const j=JSON.parse(t);if(Array.isArray(j))addLog('✅ 回傳陣列，共 '+j.length+' 筆訂單');else addLog('⚠️ 不是陣列，keys: '+Object.keys(j).join(','));}catch(e2){addLog('⚠️ JSON 解析失敗');}}
+  catch(e){addLog('❌ Error: '+e.message);}
+}
+async function testPost(){
+  addLog('>>> POST (測試訂單)');
+  const payload={campaignName:"__測試__",socialName:"測試帳號",socialLink:"https://test",phone:"0912345678",orderDetails:"【測試】商品A x1",totalAmount:100,remitAmount:100,bank5:"99999",remark:"診斷測試",priorityData:""};
+  try{const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});addLog('Status: '+r.status);const t=await r.text();addLog('Body: '+t);}
+  catch(e){addLog('❌ Fetch error: '+e.message+'\n嘗試 sendBeacon...');
+    const blob=new Blob([JSON.stringify(payload)],{type:'text/plain;charset=utf-8'});
+    const sent=navigator.sendBeacon(API,blob);addLog('sendBeacon sent: '+sent);}
+}
+</script>
+</body></html>
