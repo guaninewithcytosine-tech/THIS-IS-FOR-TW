@@ -277,7 +277,7 @@ function toggleTheme(){const h=document.documentElement;const d=h.getAttribute('
 (function(){const s=localStorage.getItem('twt-buyer-theme');if(s){document.documentElement.setAttribute('data-theme',s);document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('theme-btn');if(b)b.textContent=s==='dark'?'🌙':'☀️';});}})();
 </script>
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbyt3fyRjxbKnqj_-Kv-cID41KV06-PlpJHs1td6PfpfL5wHReyXnpcyNfEISU9rRxHT_g/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbzg3VB4wihG07qx-rfkwwCKBoN9bsKP0pswwTBn_KJNBzLhDWpr0viDV6kJ3xbelJIrhQ/exec";
 const defaultColumns={open:"🟢 開團中",closed:"🔴 停止收單",arrived:"📦 理貨中",instock:"🛍️ 現貨/已有賣場"};
 const CURRENCY_SYMBOLS={JPY:"¥",KRW:"₩",CNY:"¥",USD:"$",TWD:"NT$"};
 let boardColumns=defaultColumns,appData={},currentCampId=null,currentCampTitle="",currentCurrency="",currentThreshold=0,isSubmitting=false,lastThresholdState=null;
