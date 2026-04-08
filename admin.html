@@ -834,7 +834,8 @@ function delCategory(n){if(confirm(`確定刪除「${n}」？`)){delete appData[
 function addItem(cat){const n=document.getElementById(`nn_${cat}`).value.trim();if(!n){notify('請填寫商品名稱','err');return;}
   const defs=(appData[currentCampId]._catDefaults||{})[cat]||{};
   const p=defs.price||0;const op=defs.origPrice||0;
-  appData[currentCampId].categories[cat].push({id:'p'+Date.now(),name:n,price:p,origPrice:op});document.getElementById(`nn_${cat}`).value='';renderCategories();}
+  appData[currentCampId].categories[cat].push({id:'p'+Date.now(),name:n,price:p,origPrice:op});document.getElementById(`nn_${cat}`).value='';renderCategories();
+  setTimeout(()=>{const inp=document.getElementById(`nn_${cat}`);if(inp)inp.focus();},50);}
 function delItem(cat,idx){appData[currentCampId].categories[cat].splice(idx,1);renderCategories();}
 
 // ── 儲存至雲端 ──
