@@ -678,7 +678,7 @@ function renderPriorityTable(){
       <button class="btn btn-r btn-xs" onclick="delPriorityMember(${i})">✕</button>
     </div>`).join('')}
     </div>`;}
-  else{h=`<div class="empty" style="padding:20px;"><div class="empty-ico">🃏</div><div style="font-size:.85rem;">尚未新增成員</div></div>`;}
+  else{h=`<div class="empty" style="padding:20px;"><div style="font-size:.85rem;">尚未新增成員</div></div>`;}
   h+=`<div style="display:flex;gap:10px;margin-top:15px;padding-top:15px;border-top:1px solid var(--border);"><input type="text" class="fi" id="newPriorityName" placeholder="輸入成員名稱" onkeydown="if(event.key==='Enter')addPriorityMemberInline()"><button class="btn btn-g" onclick="addPriorityMemberInline()">＋ 新增</button></div>`;
   wrap.innerHTML=h;
 }
