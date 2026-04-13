@@ -217,7 +217,7 @@ input[type=number]{-moz-appearance:textfield;}
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span style="font-size:.82rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700;">Total Amount</span>
-          <span style="font-family:var(--font-d);font-size:1.4rem;font-weight:900;color:var(--accent);">NT$ <span id="totalPrice">0</span></span>
+          <span style="font-family:var(--font-d);font-size:1.4rem;font-weight:900;color:var(--accent);">TWD <span id="totalPrice">0</span></span>
         </div>
       </div>
       <div id="priority-section" class="priority-section" style="display:none;">
@@ -237,6 +237,7 @@ input[type=number]{-moz-appearance:textfield;}
         <div class="form-section-title">📝 訂購者個人資訊</div>
         <div class="form-group"><label class="form-label">IG / Line / FB 帳號或 ID</label><input type="text" class="buyer-input" id="socialName" placeholder="請輸入您的社群帳號或 ID"></div>
         <div class="form-group"><label class="form-label">個人主頁連結</label><input type="url" class="buyer-input" id="socialLink" placeholder="https://..."></div>
+        <div class="form-group"><label class="form-label">電子郵件</label><input type="email" class="buyer-input" id="email" placeholder="your@email.com"></div>
         <div class="form-group"><label class="form-label">連絡電話</label><input type="tel" class="buyer-input" id="phone" placeholder="0912345678"></div>
         <div class="form-group"><label class="form-label">備註（選填）</label><textarea class="buyer-textarea" id="remark" placeholder="想告訴賣家的話"></textarea></div>
       </div>
@@ -279,7 +280,7 @@ function toggleTheme(){const h=document.documentElement;const d=h.getAttribute('
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzg3VB4wihG07qx-rfkwwCKBoN9bsKP0pswwTBn_KJNBzLhDWpr0viDV6kJ3xbelJIrhQ/exec";
 const defaultColumns={open:"🟢 開團中",closed:"🔴 停止收單",arrived:"📦 理貨中",instock:"🛍️ 現貨/已有賣場"};
-const CURRENCY_SYMBOLS={JPY:"¥",KRW:"₩",CNY:"¥",USD:"$",TWD:"NT$"};
+const CURRENCY_SYMBOLS={JPY:"¥",KRW:"₩",CNY:"¥",USD:"$",TWD:"TWD"};
 let boardColumns=defaultColumns,appData={},currentCampId=null,currentCampTitle="",currentCurrency="",currentThreshold=0,isSubmitting=false,lastThresholdState=null;
 
 function esc(s){if(s==null)return'';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
@@ -357,7 +358,7 @@ function openCampaign(id){
     prodC.innerHTML+=`<div class="cat-title">${catImgHtml}${esc(catName)}</div>`;
     items.forEach(item=>{const curSym=CURRENCY_SYMBOLS[currentCurrency]||currentCurrency;const origD=item.origPrice&&currentCurrency?`<span style="font-size:0.75rem;color:var(--dim);margin-left:4px;">(原幣: ${esc(curSym)}${item.origPrice})</span>`:'';
       const imgHtml=item.image?`<img src="${item.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-right:10px;flex-shrink:0;">`:'';
-      prodC.innerHTML+=`<div class="product-item"><div style="display:flex;align-items:center;">${imgHtml}<div style="display:flex;flex-direction:column;"><span class="product-name">${esc(item.name)}</span><span class="product-price">NT$ ${item.price} ${origD}</span></div></div>
+      prodC.innerHTML+=`<div class="product-item"><div style="display:flex;align-items:center;">${imgHtml}<div style="display:flex;flex-direction:column;"><span class="product-name">${esc(item.name)}</span><span class="product-price">TWD ${item.price} ${origD}</span></div></div>
         <div class="qty-ctrl">
           <button class="qty-btn" onclick="qtyAdjust(this,-1)">−</button>
           <input type="number" class="qty-val" data-price="${item.price}" data-orig="${item.origPrice||0}" data-name="【${esc(catName)}】${esc(item.name)}" min="0" max="99" value="0" onfocus="if(this.value==='0')this.value=''" onblur="if(this.value==='')this.value='0';onQtyChange(this)" oninput="onQtyChange(this)">
@@ -365,7 +366,7 @@ function openCampaign(id){
         </div></div>`;});}
   const members=appData[id].priorityMembers||[];const priSection=document.getElementById('priority-section');const rcb=document.getElementById('random-priority-cb');if(rcb){rcb.checked=false;toggleRandomPriority();}
   if(members.length){priSection.style.display='block';renderPriorityInputs(members);}else{priSection.style.display='none';document.getElementById('priority-list').innerHTML='';}
-  ['socialName','socialLink','phone','remark','remitAmount','bank5'].forEach(fid=>{const el=document.getElementById(fid);if(el)el.value='';});
+  ['socialName','socialLink','email','phone','remark','remitAmount','bank5'].forEach(fid=>{const el=document.getElementById(fid);if(el)el.value='';});
   calculateTotal();document.getElementById('view-campaigns').style.display='none';document.getElementById('view-order-form').style.display='block';window.scrollTo(0,0);
 }
 function showCampaignList(){document.getElementById('view-order-form').style.display='none';document.getElementById('view-campaigns').style.display='block';}
@@ -389,7 +390,7 @@ function validateBuyerPriority(){if(document.getElementById('random-priority-cb'
 
 async function submitOrder(){
   if(isSubmitting)return;
-  const socialName=document.getElementById('socialName').value.trim(),socialLink=document.getElementById('socialLink').value.trim(),phone=document.getElementById('phone').value.trim(),remark=document.getElementById('remark').value.trim(),remitAmount=document.getElementById('remitAmount').value.trim(),bank5=document.getElementById('bank5').value.trim();
+  const socialName=document.getElementById('socialName').value.trim(),socialLink=document.getElementById('socialLink').value.trim(),email=document.getElementById('email').value.trim(),phone=document.getElementById('phone').value.trim(),remark=document.getElementById('remark').value.trim(),remitAmount=document.getElementById('remitAmount').value.trim(),bank5=document.getElementById('bank5').value.trim();
   const totals=calculateTotal(),total=totals.total,cards=(currentCurrency&&currentThreshold>0)?Math.floor(totals.origTotal/currentThreshold):0;
   if(!socialName||!socialLink||!phone||!remitAmount||!bank5||total===0){alert('請確認已選擇商品，並填寫完整的訂購與匯款資料！');return;}
   if(!/^\d{5}$/.test(bank5)){alert('匯款後五碼請填寫 5 位數字');return;}
@@ -398,9 +399,9 @@ async function submitOrder(){
   const orderDetails=[];document.querySelectorAll('.qty-val').forEach(inp=>{const q=parseInt(inp.value);if(q>0)orderDetails.push(`${inp.getAttribute('data-name')} x${q}`);});
   const members=appData[currentCampId].priorityMembers||[];let priorityData='';
   if(members.length&&isThresholdMet){if(isRandom){priorityData=(currentCurrency&&currentThreshold>0)?`${cards}張 | 🎲 隨機分配`:`🎲 隨機分配`;}else{let chosen=[];members.forEach((m,i)=>{const v=document.getElementById(`bpsel-${i}`)?.value;if(v)chosen.push({name:m.name,rank:parseInt(v)});});chosen.sort((a,b)=>a.rank-b.rank);let rt=chosen.map(c=>`${c.rank}. ${c.name}`).join(' / ');if(!rt)rt='未填寫排序';priorityData=(currentCurrency&&currentThreshold>0)?`${cards}張 | ${rt}`:rt;}}
-  const orderData={campaignName:currentCampTitle,socialName,socialLink,phone,orderDetails:orderDetails.join('\n'),totalAmount:total,remitAmount,bank5,remark,priorityData};
+  const orderData={campaignName:currentCampTitle,socialName,socialLink,email,phone,orderDetails:orderDetails.join('\n'),totalAmount:total,remitAmount,bank5,remark,priorityData};
   const btn=document.getElementById('submitBtn');btn.innerHTML='<div class="sp"></div> 傳送中...';btn.disabled=true;isSubmitting=true;
-  try{await apiPost(orderData);alert(`🎉 訂單送出成功！\n\n開團：${currentCampTitle}\n系統總計：NT$ ${total.toLocaleString()}\n匯款金額：NT$ ${remitAmount}\n後五碼：${bank5}`);showCampaignList();}catch(e){alert('傳送失敗，請稍後再試！');}finally{btn.innerHTML='確認送出訂單 🚀';btn.disabled=false;isSubmitting=false;}
+  try{await apiPost(orderData);alert(`🎉 訂單送出成功！\n\n開團：${currentCampTitle}\n系統總計：TWD ${total.toLocaleString()}\n匯款金額：TWD ${remitAmount}\n後五碼：${bank5}`);showCampaignList();}catch(e){alert('傳送失敗，請稍後再試！');}finally{btn.innerHTML='確認送出訂單 🚀';btn.disabled=false;isSubmitting=false;}
 }
 
 // ══ 訂單查詢 ══
@@ -420,10 +421,10 @@ async function queryOrder(){
       const campData=Object.values(appData).find(d=>d.title===o.campaignName);const lStep=campData?(campData.logisticsStep||1):1;const myshipLink=campData?(campData.myshipLink||''):'';
       // 只有理貨中 (lStep>=5) 才顯示二補與賣貨便
       const showSecPay=lStep>=5;
-      const wS=showSecPay&&o.weight?`重量：${o.weight} kg`:'';const spS=showSecPay&&o.secondPayment?`二補金額：NT$ ${o.secondPayment}`:'';
+      const wS=showSecPay&&o.weight?`重量：${o.weight} kg`:'';const spS=showSecPay&&o.secondPayment?`二補金額：TWD ${o.secondPayment}`:'';
       let secH='';if(wS||spS){secH=`<div style="background:var(--s2);border-left:3px solid var(--p);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px;margin-top:12px;"><div style="font-size:0.75rem;color:var(--mid);font-weight:bold;margin-bottom:2px;">⚖️ 二補明細</div><div style="font-size:0.95rem;font-weight:bold;color:var(--text);">${esc(wS)}${wS&&spS?' <span style="margin:0 6px;color:var(--dim)">|</span> ':''}<span style="color:var(--p-hi);">${esc(spS)}</span></div></div>`;}
       let myH='';if(showSecPay&&myshipLink){myH=`<a href="${esc(myshipLink)}" target="_blank" style="display:flex;justify-content:center;align-items:center;gap:8px;background:#118b42;color:#fff;text-decoration:none;padding:14px;border-radius:var(--r-sm);font-weight:bold;margin-top:12px;">🔗 前往 7-11 賣貨便下單包裹</a>`;}
-      return`<div class="order-block"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;"><div><div style="font-size:.78rem;color:var(--mid);">${esc(o.campaignName)}</div><div style="font-weight:700;font-size:.95rem;margin-top:2px;">${esc(o.socialName)}</div></div><div style="text-align:right;"><span class="badge ${bc}">${bl}</span><div style="font-size:1rem;font-weight:700;color:var(--green);margin-top:5px;">NT$${parseFloat(o.totalAmount||0).toLocaleString()}</div></div></div>
+      return`<div class="order-block"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;"><div><div style="font-size:.78rem;color:var(--mid);">${esc(o.campaignName)}</div><div style="font-weight:700;font-size:.95rem;margin-top:2px;">${esc(o.socialName)}</div></div><div style="text-align:right;"><span class="badge ${bc}">${bl}</span><div style="font-size:1rem;font-weight:700;color:var(--green);margin-top:5px;">TWD${parseFloat(o.totalAmount||0).toLocaleString()}</div></div></div>
         <div style="display:flex;gap:20px;"><div style="flex:1;">${steps.map(([ic,lb,done])=>`<div class="tl-item"><div class="tl-dot ${done?'tl-done':'tl-wait'}">${ic}</div><div style="padding-top:3px;"><div style="font-size:.88rem;font-weight:700;color:${done?'var(--text)':'var(--dim)'};">${lb}</div></div></div>`).join('')}</div></div>
         <div style="background:var(--s1);border-radius:var(--r-sm);padding:16px 12px;margin-top:10px;border:1px solid var(--border);"><div style="font-size:0.8rem;font-weight:bold;color:var(--mid);margin-bottom:5px;padding-left:5px;">🌍 賣場大貨物流進度</div>${generateLogisticsHtml(lStep)}</div>
         ${(()=>{
